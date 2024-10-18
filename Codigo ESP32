@@ -1,0 +1,45 @@
+#include <Arduino.h>
+
+// Definir pines de los potenciómetros
+#define POT1_PIN 36  // Potenciómetro 1 conectado al pin ADC0 (GPIO 36)
+#define POT2_PIN 39  // Potenciómetro 2 conectado al pin ADC1 (GPIO 39)
+
+// Definir el UART para comunicarse con la STM32
+#define UART_BAUDRATE 115200  // Velocidad de UART
+HardwareSerial mySerial(0);   // Usar UART0 (GPIO 1 para TX, GPIO 3 para RX)
+
+void setup() {
+  // Inicializar la comunicación UART
+  mySerial.begin(UART_BAUDRATE);
+  
+  // Inicializar el puerto serie para depuración
+  Serial.begin(115200);
+  
+  // Configurar pines de los potenciómetros como entrada
+  pinMode(POT1_PIN, INPUT);
+  pinMode(POT2_PIN, INPUT);
+}
+
+void loop() {
+  // Leer los valores de los potenciómetros
+  int pot1Value = analogRead(POT1_PIN);  // Leer valor de Potenciómetro 1
+  int pot2Value = analogRead(POT2_PIN);  // Leer valor de Potenciómetro 2
+
+  // Mapeo de los valores leídos (0 - 4095) a un rango de 0 a 99
+  int sensor1Value = map(pot1Value, 0, 4095, 0, 99);  // Sensor 1
+  int sensor2Value = map(pot2Value, 0, 4095, 0, 99);  // Sensor 2
+  
+  // Enviar los valores al STM32 usando UART
+  mySerial.print(sensor1Value);  // Enviar valor de Sensor 1
+  mySerial.print(",");           // Separador
+  mySerial.println(sensor2Value); // Enviar valor de Sensor 2 con salto de línea
+  
+  // Imprimir los valores en el puerto serie para depuración
+  Serial.print("Sensor 1: ");
+  Serial.print(sensor1Value);
+  Serial.print(" - Sensor 2: ");
+  Serial.println(sensor2Value);
+  
+  // Esperar un poco antes de la siguiente lectura
+  delay(500);
+}
